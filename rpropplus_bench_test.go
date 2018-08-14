@@ -652,7 +652,7 @@ func BenchmarkActivationNeuronAndDerivateHiddenLayer(b *testing.B) {
 				[]float64{-3.0938322741, 1.9692725150},
 			})
 		if err != nil {
-			b.Fatalf("Error while activate: %d", err.Error())
+			b.Fatalf("Error while activate: %s", err.Error())
 		}
 	}
 }

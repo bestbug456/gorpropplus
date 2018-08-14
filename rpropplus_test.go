@@ -84,7 +84,7 @@ func TestActivationNeuronAndDerivateNoHiddenLayer(t *testing.T) {
 			[]float64{-0.24877700455},
 		})
 	if err != nil {
-		t.Fatalf("Error while activate: %d", err.Error())
+		t.Fatalf("Error while activate: %s", err.Error())
 	}
 
 	if derivate[0][0] != 0.22588630165319862 {
@@ -127,7 +127,7 @@ func TestActivationNeuronAndDerivateHiddenLayer(t *testing.T) {
 			[]float64{-3.0938322741, 1.9692725150},
 		})
 	if err != nil {
-		t.Fatalf("Error while activate: %d", err.Error())
+		t.Fatalf("Error while activate: %s", err.Error())
 	}
 
 	if derivate[0][0] != 0.09768765836926072 {
@@ -254,7 +254,7 @@ func TestComputeNet(t *testing.T) {
 	// for this and only this value we have 2 possible
 	// value. This is inconsistency is caused by the go
 	// 1.10.x which cause a different result.
-	if outputNet[0][0] != 0.27660658598298415 && outputNet[0][0] != 0.2766065859829842{
+	if outputNet[0][0] != 0.27660658598298415 && outputNet[0][0] != 0.2766065859829842 {
 		t.Fatalf("Error: exspected 0.27660658598298415 or 0.2766065859829842 but having %v", outputNet[0][0])
 	}
 	if outputNet[1][0] != 0.6571402196695981 {
