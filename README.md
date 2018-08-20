@@ -65,10 +65,12 @@ It's esay to use our libray. You have just to create a new `NeuralNetworkArgumen
 Glad you ask. Even if the Golang compiler do a lot of work we work really hard in order to optimise our code. Look at this benchmark:
 
 ```
-BenchmarkTrain-4                                            5000        330654 ns/op      164370 B/op       2780 allocs/op
-BenchmarkActivationNeuronAndDerivateHiddenLayer-4        1000000          1530 ns/op         496 B/op         12 allocs/op
-BenchmarkComputeNet-4                                     300000          3616 ns/op        1464 B/op         33 allocs/op
-BenchmarkCalculateGradients-4                             500000          3396 ns/op        1664 B/op         40 allocs/op
+BenchmarkTrain-4                                           10000        174518 ns/op      152150 B/op       2573 allocs/op
+BenchmarkActivationNeuronAndDerivateHiddenLayer-4        1000000          1326 ns/op         496 B/op         12 allocs/op
+BenchmarkComputeNet-4                                     500000          3134 ns/op        1464 B/op         33 allocs/op
+BenchmarkCalculateGradients-4                             500000          2673 ns/op        1664 B/op         40 allocs/op
+BenchmarkPredictWithLinearOutputTRUE-4                   2000000           565 ns/op         400 B/op         14 allocs/op
+BenchmarkPredictWithLinearOutputFALSE-4                  3000000           502 ns/op         360 B/op         12 allocs/op
 ```
 
 ###### This library seem very cool! Who create it?

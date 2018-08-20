@@ -797,6 +797,100 @@ func TestTrain(t *testing.T) {
 	}
 }
 
+func TestPredict(t *testing.T){
+	nn, err := createNewStandardNNOneHiddenlayer()
+	if err != nil {
+		t.Fatalf("Error while creating a new neural network: %s", err.Error())
+	}
+	// predict with linear output TRUE
+	nn.LinearOutput = true
+	nn.Weights = [][][]float64{
+		[][]float64{
+			[]float64{1.4977972345, 0.16028919024},
+			[]float64{-2.0576028303, 0.05778128603},
+			[]float64{-1.9497804732, -0.01387975675},
+			[]float64{-0.7842283045, -1.20152607718},
+			[]float64{0.2203101549, -0.80684920968},
+		},
+		[][]float64{
+			[]float64{-2.0760457565},
+			[]float64{-0.3657459873},
+			[]float64{0.1165046063},
+		},
+	}
+	nn.Train(
+		[][]float64{
+			[]float64{0, 1, 0, 0},
+			[]float64{1, 0, 0, 0},
+			[]float64{0, 0, 0, 1},
+			[]float64{1, 0, 0, 0},
+			[]float64{1, 0, 0, 0},
+		},
+		[][]float64{
+			[]float64{0},
+			[]float64{1},
+			[]float64{1},
+			[]float64{1},
+			[]float64{0},
+		},
+	)
+
+	testSetData := [][]float64{[]float64{0, 1, 0, 0},
+							   []float64{1, 0, 0, 0},
+							   []float64{0, 0, 0, 1},
+							   []float64{1, 0, 0, 0}}
+	correctResults := [][]float64{[]float64{4.101384275467801e-05},
+								  []float64{0.6711889777171309},
+								  []float64{0.9878225113545741},
+								  []float64{0.6711889777171309}}
+
+	for i := 0; i < len(testSetData); i++ {
+		res, err := nn.Predict(testSetData[i])
+		if err != nil {
+			t.Fatalf("Error during predict %s", err.Error())
+		}
+		if res[0] != correctResults[i][0] {
+			t.Fatalf("Error at the indeces %d: exspected %f but having %f", i, correctResults[i][0], res[0])
+		}
+	}
+
+	// predict with linear output FALSE
+	nn.LinearOutput = false
+	nn.Weights = [][][]float64{
+		[][]float64{
+			[]float64{-0.3094936307, 1.1894633375},
+			[]float64{1.7938942111, -0.7728903275},
+			[]float64{-2.9713719713, 1.2031703117},
+			[]float64{-0.1989300481, 1.5803919589},
+			[]float64{3.2561112564, -4.4571365361},
+		},
+		[][]float64{
+			[]float64{-0.6192761778},
+			[]float64{3.1272406514},
+			[]float64{-1.9848503107},
+		},
+	}
+
+	testSetData = [][]float64{[]float64{0, 1, 0, 0},
+							   []float64{1, 0, 0, 0},
+							   []float64{0, 0, 0, 1},
+							   []float64{1, 0, 0, 0}}
+	correctResults = [][]float64{[]float64{0.08910501704334706},
+								  []float64{0.675675502848492},
+								  []float64{0.9071302196512702},
+								  []float64{0.675675502848492}}
+
+	for i := 0; i < len(testSetData); i++ {
+		res, err := nn.Predict(testSetData[i])
+		if err != nil {
+			t.Fatalf("Error during predict %s", err.Error())
+		}
+		if res[0] != correctResults[i][0] {
+			t.Fatalf("Error at the indeces %d: exspected %f but having %f", i, correctResults[i][0], res[0])
+		}
+	}
+}
+
 // UTILITY FUNCTION FOR TESTING
 
 func createNewStandardNNOneHiddenlayer() (*NeuralNetwork, error) {
