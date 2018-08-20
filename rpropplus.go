@@ -374,10 +374,11 @@ func (n *NeuralNetwork) TrainAndValidate(input []float64, output []float64) ([][
 // Predict permit to have a prediction  of  the
 // inputs. it returns the prediction result  or
 // an error if something went wrong.
-func (n *NeuralNetwork) Predict(input []float64) ([][]float64, error) {
+func (n *NeuralNetwork) Predict(input []float64) ([]float64, error) {
 
+	allinputCovariate := make([][][]float64, len(n.Weights))
 	inputCovariate := make([][]float64, 1)
-	outputNet := make([][]float64, len(n.Weights[len(n.Weights)-1]))
+	outputNet := make([]float64, len(n.Weights[len(n.Weights)-1]))
 
 	covariate := make([]float64, len(input)+1)
 	covariate[0] = 1
@@ -386,10 +387,11 @@ func (n *NeuralNetwork) Predict(input []float64) ([][]float64, error) {
 	}
 	inputCovariate[0] = covariate
 
-	deriv := make([][][]float64, len(n.Weights))
+	allinputCovariate[0] = inputCovariate
 	var err error
 	for i := 0; i < len(n.Weights); i++ {
-		inputCovariate, deriv[i], err = n.activationNeuronAndDerivate(inputCovariate, n.Weights[i])
+		allinputCovariate[i] = inputCovariate
+		inputCovariate, _, err = n.activationNeuronAndDerivate(allinputCovariate[i], n.Weights[i])
 		if err != nil {
 			return nil, err
 		}
@@ -399,20 +401,13 @@ func (n *NeuralNetwork) Predict(input []float64) ([][]float64, error) {
 		// the output of neural network is
 		// equal to the previous level input
 		// multiply to weights
-		outputNet = matrixCrossProduct(inputCovariate, n.Weights[len(n.Weights)-1])
-		for j := 0; j < len(deriv[len(deriv)-1]); j++ {
-			for i := 0; i < len(deriv[len(deriv)-1][j]); i++ {
-				deriv[len(deriv)-1][j][i] = 1.0
-			}
-		}
+		res := matrixCrossProduct(allinputCovariate[len(allinputCovariate)-1], n.Weights[len(n.Weights)-1])
+		outputNet = res[0]
 	} else {
 		// the last inputCovariate is the final
 		// result of the neural network we save
 		// it without bias
-		for j := 0; j < len(inputCovariate); j++ {
-			outputNet[j] = inputCovariate[j][1:]
-		}
+		outputNet = inputCovariate[0][1:]
 	}
-
 	return outputNet, nil
 }
