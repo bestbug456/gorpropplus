@@ -9,6 +9,7 @@ import (
 	"fmt"
 )
 
+// NeuralNetwork is the actual neural network object
 type NeuralNetwork struct {
 	// Neural Network properties
 	Weights                [][][]float64
@@ -31,6 +32,8 @@ type NeuralNetwork struct {
 	Plus         float64
 }
 
+// NeuralNetworkArguments permit to compact all 
+// the various arguments need by this library.
 type NeuralNetworkArguments struct {
 	LearningRate       []float64
 	HiddenLayer        []int
