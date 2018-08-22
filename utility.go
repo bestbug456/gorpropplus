@@ -6,6 +6,8 @@ import (
 	"math/rand"
 )
 
+// randomNormalSlice create a normal slice with
+// He-et-al Initialization optimisation
 func randomNormalSlice(size int,previusSize int) []float64 {
 	neurons := make([]float64, size)
 	for i := 0; i < len(neurons); i++ {
