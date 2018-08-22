@@ -59,8 +59,9 @@ func NewNeuralNetworkAndSetup(args NeuralNetworkArguments) (*NeuralNetwork, erro
 	var totalWeights int
 	var nrRow []int
 	var nrCol []int
+	previusLayer:=args.InputSize
 	if len(args.HiddenLayer) == 1 && args.HiddenLayer[0] == 0 {
-		sliceWeights := randomNormalSlice((args.InputSize + 1) * args.OutputSize)
+		sliceWeights := randomNormalSlice((args.InputSize + 1) * args.OutputSize,previusLayer)
 		totalWeights = (args.InputSize + 1) * args.OutputSize
 		weights = make([][][]float64, 1)
 		var err error
@@ -82,11 +83,12 @@ func NewNeuralNetworkAndSetup(args NeuralNetworkArguments) (*NeuralNetwork, erro
 		weights = make([][][]float64, len(nrCol))
 		var err error
 		for i := 0; i < len(weights); i++ {
-			weights[i], err = createMatrix(nrRow[i], nrCol[i], randomNormalSlice(nrCol[i]*nrRow[i]))
+			weights[i], err = createMatrix(nrRow[i], nrCol[i], randomNormalSlice(nrCol[i]*nrRow[i],previusLayer))
 			totalWeights = nrCol[i] * nrRow[i]
 			if err != nil {
 				return nil, err
 			}
+			previusLayer = len(weights[i])-1
 		}
 	}
 
