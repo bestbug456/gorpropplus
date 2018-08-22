@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.com/bestbug456/gorpropplus.svg?branch=master)](https://travis-ci.org/bestbu456/gorpropplus)&nbsp;
 [![codecov](https://codecov.io/gh/bestbug456/gorpropplus/branch/master/graph/badge.svg)](https://codecov.io/gh/bestbug456/gorpropplus)&nbsp;
+[![Go Report Card](https://goreportcard.com/badge/github.com/bestbug456/gorpropplus)](https://goreportcard.com/report/github.com/bestbug456/gorpropplus)&nbsp;
 
 This project contain the Neural Network called "rprop+" (resilient backpropagation with weight backtracking). The project at the moment have the train and the predict function completed and tested, the validte function will be create soon.
 
