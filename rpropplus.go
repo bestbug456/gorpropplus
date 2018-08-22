@@ -378,7 +378,7 @@ func (n *NeuralNetwork) Predict(input []float64) ([]float64, error) {
 
 	allinputCovariate := make([][][]float64, len(n.Weights))
 	inputCovariate := make([][]float64, 1)
-	outputNet := make([]float64, len(n.Weights[len(n.Weights)-1]))
+	var outputNet []float64
 
 	covariate := make([]float64, len(input)+1)
 	covariate[0] = 1
