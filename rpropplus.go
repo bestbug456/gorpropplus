@@ -6,6 +6,7 @@
 package gorpropplus
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -177,7 +178,6 @@ func (n *NeuralNetwork) Train(input [][]float64, output [][]float64) error {
 			break
 		}
 		gradientsOld = n.plus(gradients, gradientsOld)
-		//fmt.Println("weights", n.Weights)
 
 		deriv, allInputCoviariate, outputNet, err = n.computeNet(input, output)
 		if err != nil {
@@ -467,8 +467,8 @@ func (n *NeuralNetwork) Predict(input []float64) ([]float64, error) {
 	}
 	inputCovariate[0] = covariate
 
-	allinputCovariate[0] = inputCovariate
 	var err error
+
 	for i := 0; i < len(n.Weights); i++ {
 		allinputCovariate[i] = inputCovariate
 		inputCovariate, _, err = n.activationNeuronAndDerivate(allinputCovariate[i], n.Weights[i])
