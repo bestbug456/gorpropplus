@@ -891,6 +891,190 @@ func TestPredict(t *testing.T) {
 	}
 }
 
+func TestValidateSingleOutput(t *testing.T) {
+	nn, err := createNewStandardNNOneHiddenlayer()
+	if err != nil {
+		t.Fatalf("Error while creating a new neural network: %s", err.Error())
+	}
+	// predict with linear output TRUE
+	nn.LinearOutput = true
+	nn.Weights = [][][]float64{
+		{
+			{1.4977972345, 0.16028919024},
+			{-2.0576028303, 0.05778128603},
+			{-1.9497804732, -0.01387975675},
+			{-0.7842283045, -1.20152607718},
+			{0.2203101549, -0.80684920968},
+		},
+		{
+			{-2.0760457565},
+			{-0.3657459873},
+			{0.1165046063},
+		},
+	}
+
+	nn.Train(
+		[][]float64{
+			{0, 1, 0, 0},
+			{1, 0, 0, 0},
+			{0, 0, 0, 1},
+			{1, 0, 0, 0},
+			{1, 0, 0, 0},
+		},
+		[][]float64{
+			{0},
+			{1},
+			{1},
+			{1},
+			{0},
+		},
+	)
+
+	testSetData := [][]float64{
+		{0, 1, 0, 0},
+		{1, 0, 0, 0},
+		{0, 0, 0, 1},
+		{1, 0, 0, 0}}
+	correctResults := [][]float64{{4.101384275467801e-05}, {0.6711889777171309}, {0.9878225113545741}, {0.6711889777171309}}
+	/*
+		&{[[3 0] [0 1]] 4 [[4.101384275467801e-05] [0.6711889777171309] [0.9878225113545741] [0.6711889777171309]]}
+
+	*/
+	ris, err := nn.Validate(testSetData, correctResults)
+	t.Log(ris)
+	if ris.CorrectPrediction != 4 {
+		t.Fatalf("Error: correct prediction should be 4 but is %d", ris.CorrectPrediction)
+	}
+	if len(ris.ConfusionMatrix) != 2 {
+		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
+	}
+	if len(ris.ConfusionMatrix[0]) != 2 {
+		t.Fatalf("Exspected matrix row zero of len 2 but having %d.", len(ris.ConfusionMatrix[0]))
+	}
+	if len(ris.ConfusionMatrix[1]) != 2 {
+		t.Fatalf("Exspected matrix row one of len 2 but having %d.", len(ris.ConfusionMatrix[1]))
+	}
+	if ris.ConfusionMatrix[0][0] != 3 {
+		t.Fatalf("ConfusionMatrix[0][0] should be 3 instead is %d", ris.ConfusionMatrix[0][0])
+	}
+	if ris.ConfusionMatrix[0][1] != 0 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 3 instead is %d", ris.ConfusionMatrix[0][1])
+	}
+	if ris.ConfusionMatrix[1][0] != 0 {
+		t.Fatalf("ConfusionMatrix[1][0] should be 3 instead is %d", ris.ConfusionMatrix[1][0])
+	}
+	if ris.ConfusionMatrix[1][1] != 1 {
+		t.Fatalf("ConfusionMatrix[1][1] should be 3 instead is %d", ris.ConfusionMatrix[1][1])
+	}
+	if len(ris.PredictionResult) != 4 {
+		t.Fatalf("Error: prediction result should have len 4 but having %d", len(ris.PredictionResult))
+	}
+	for i := 0; i < len(ris.PredictionResult); i++ {
+		for j := 0; j < len(ris.PredictionResult[i]); j++ {
+			if ris.PredictionResult[i][j] != correctResults[i][j] {
+				t.Fatalf("Error element %d-%d should be %f but is %f", i, j, ris.PredictionResult[i][j], correctResults[i][j])
+			}
+		}
+	}
+}
+
+func TestValidateTwoOutput(t *testing.T) {
+	nn, err := createNewStandardNNOneHiddenlayer()
+	if err != nil {
+		t.Fatalf("Error while creating a new neural network: %s", err.Error())
+	}
+	// predict with linear output TRUE
+	nn.LinearOutput = true
+	nn.Weights = [][][]float64{
+		{
+			{0.3707766042, 0.3130231630},
+			{-0.8593964782, -1.6980561950},
+			{1.6986240116, -0.2471338187},
+			{0.6781978162, -1.1633329710},
+			{-0.9446642086, -0.2910403321},
+		},
+		{
+			{0.2158120155, -0.7702536416},
+			{0.4455022877, -0.9965881874},
+			{-0.3543477143, 1.2040803786},
+		},
+	}
+
+	nn.Train(
+		[][]float64{
+			{0, 1, 0, 0},
+			{1, 0, 0, 0},
+			{0, 0, 0, 1},
+			{1, 0, 0, 0},
+			{1, 0, 0, 0},
+			{0, 0, 0, 1},
+		},
+		[][]float64{
+			{0, 1},
+			{1, 0},
+			{1, 0},
+			{1, 0},
+			{0, 1},
+			{0, 1},
+		},
+	)
+
+	testSetData := [][]float64{
+		{0, 1, 0, 0},
+		{1, 0, 0, 0},
+		{0, 0, 0, 1},
+		{1, 0, 0, 0},
+		{1, 0, 0, 0}}
+	correctResults := [][]float64{{0.007648935154, 1.0006310706}, {0.668372765631, 0.3349155121}, {0.497756950918, 0.5005216145}, {0.668372765631, 0.3349155121}, {0.668372765631, 0.3349155121}}
+	ris, err := nn.Validate(testSetData, correctResults)
+	/*
+
+		&{
+			[
+				[3 1]
+				[0 1]
+			]
+			4
+			[
+				[-0.008025147536364241 0.9969722587880565] [0.6675367299017687 0.3340770195196828] [0.49985859075699934 0.49896551805833095] [0.6675367299017687 0.3340770195196828] [0.6675367299017687 0.3340770195196828]]}
+	*/
+	t.Log(ris)
+	if ris.CorrectPrediction != 4 {
+		t.Fatalf("Error: correct prediction should be 4 but is %d", ris.CorrectPrediction)
+	}
+	if len(ris.ConfusionMatrix) != 2 {
+		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
+	}
+	if len(ris.ConfusionMatrix[0]) != 2 {
+		t.Fatalf("Exspected matrix row zero of len 2 but having %d.", len(ris.ConfusionMatrix[0]))
+	}
+	if len(ris.ConfusionMatrix[1]) != 2 {
+		t.Fatalf("Exspected matrix row one of len 2 but having %d.", len(ris.ConfusionMatrix[1]))
+	}
+	if ris.ConfusionMatrix[0][0] != 3 {
+		t.Fatalf("ConfusionMatrix[0][0] should be 3 instead is %d", ris.ConfusionMatrix[0][0])
+	}
+	if ris.ConfusionMatrix[0][1] != 0 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 3 instead is %d", ris.ConfusionMatrix[0][1])
+	}
+	if ris.ConfusionMatrix[1][0] != 0 {
+		t.Fatalf("ConfusionMatrix[1][0] should be 3 instead is %d", ris.ConfusionMatrix[1][0])
+	}
+	if ris.ConfusionMatrix[1][1] != 1 {
+		t.Fatalf("ConfusionMatrix[1][1] should be 3 instead is %d", ris.ConfusionMatrix[1][1])
+	}
+	if len(ris.PredictionResult) != 4 {
+		t.Fatalf("Error: prediction result should have len 4 but having %d", len(ris.PredictionResult))
+	}
+	for i := 0; i < len(ris.PredictionResult); i++ {
+		for j := 0; j < len(ris.PredictionResult[i]); j++ {
+			if ris.PredictionResult[i][j] != correctResults[i][j] {
+				t.Fatalf("Error element %d-%d should be %f but is %f", i, j, ris.PredictionResult[i][j], correctResults[i][j])
+			}
+		}
+	}
+}
+
 // UTILITY FUNCTION FOR TESTING
 
 func createNewStandardNNOneHiddenlayer() (*NeuralNetwork, error) {

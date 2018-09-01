@@ -8,12 +8,11 @@ import (
 
 // randomNormalSlice create a normal slice with
 // He-et-al Initialization optimisation
-func randomNormalSlice(size int,previusSize int) []float64 {
+func randomNormalSlice(size int, previusSize int) []float64 {
 	neurons := make([]float64, size)
 	for i := 0; i < len(neurons); i++ {
 		neurons[i] = rand.NormFloat64() * math.Sqrt(2.0/float64(previusSize))
 	}
-	fmt.Printf("%+v\n",neurons)
 	return neurons
 }
 
