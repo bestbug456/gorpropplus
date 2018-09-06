@@ -1,6 +1,7 @@
 package gorpropplus
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -936,15 +937,66 @@ func TestValidateSingleOutput(t *testing.T) {
 		{0, 0, 0, 1},
 		{1, 0, 0, 0},
 		{1, 0, 0, 0}}
-	correctResults := [][]float64{{0.005245251675},
+
+	correctResults := [][]float64{
+		{0.005245251675},
 		{0.667866367969},
 		{0.998111722794},
 		{0.667866367969},
 		{0.667866367969}}
+
 	ris, err := nn.Validate(testSetData, correctResults)
 	t.Log(ris)
-	if ris.CorrectPrediction != 4 {
-		t.Fatalf("Error: correct prediction should be 4 but is %d", ris.CorrectPrediction)
+	fmt.Println(ris)
+	if ris.CorrectPrediction != 5 {
+		t.Fatalf("Error: correct prediction should be 5 but is %d", ris.CorrectPrediction)
+	}
+	if len(ris.ConfusionMatrix) != 2 {
+		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
+	}
+	if len(ris.ConfusionMatrix[0]) != 2 {
+		t.Fatalf("Exspected matrix row zero of len 2 but having %d.", len(ris.ConfusionMatrix[0]))
+	}
+	if len(ris.ConfusionMatrix[1]) != 2 {
+		t.Fatalf("Exspected matrix row one of len 2 but having %d.", len(ris.ConfusionMatrix[1]))
+	}
+	if ris.ConfusionMatrix[0][0] != 4 {
+		t.Fatalf("ConfusionMatrix[0][0] should be 4 instead is %d", ris.ConfusionMatrix[0][0])
+	}
+	if ris.ConfusionMatrix[0][1] != 0 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 0 instead is %d", ris.ConfusionMatrix[0][1])
+	}
+	if ris.ConfusionMatrix[1][0] != 0 {
+		t.Fatalf("ConfusionMatrix[1][0] should be 0 instead is %d", ris.ConfusionMatrix[1][0])
+	}
+	if ris.ConfusionMatrix[1][1] != 1 {
+		t.Fatalf("ConfusionMatrix[1][1] should be 1 instead is %d", ris.ConfusionMatrix[1][1])
+	}
+	if len(ris.PredictionResult) != 5 {
+		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
+	}
+	/*for i := 0; i < len(ris.PredictionResult); i++ {
+		for j := 0; j < len(ris.PredictionResult[i]); j++ {
+			if ris.PredictionResult[i][j] != correctResults[i][j] {
+				t.Fatalf("Error element %d-%d should be %f but is %f", i, j, ris.PredictionResult[i][j], correctResults[i][j])
+			}
+		}
+	}*/
+
+	outputExspected := [][]float64{
+		{0},
+		{1},
+		{1},
+		{1},
+		{0},
+	}
+	ris, err = nn.Validate(testSetData, outputExspected)
+	if err != nil {
+		t.Fatalf("Error during validate phase: %s", err.Error())
+	}
+	fmt.Println(ris)
+	if ris.CorrectPrediction != 2 {
+		t.Fatalf("Error: correct prediction should be 5 but is %d", ris.CorrectPrediction)
 	}
 	if len(ris.ConfusionMatrix) != 2 {
 		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
@@ -958,24 +1010,17 @@ func TestValidateSingleOutput(t *testing.T) {
 	if ris.ConfusionMatrix[0][0] != 3 {
 		t.Fatalf("ConfusionMatrix[0][0] should be 3 instead is %d", ris.ConfusionMatrix[0][0])
 	}
-	if ris.ConfusionMatrix[0][1] != 0 {
-		t.Fatalf("ConfusionMatrix[0][1] should be 3 instead is %d", ris.ConfusionMatrix[0][1])
+	if ris.ConfusionMatrix[0][1] != 1 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 1 instead is %d", ris.ConfusionMatrix[0][1])
 	}
 	if ris.ConfusionMatrix[1][0] != 0 {
-		t.Fatalf("ConfusionMatrix[1][0] should be 3 instead is %d", ris.ConfusionMatrix[1][0])
+		t.Fatalf("ConfusionMatrix[1][0] should be 0 instead is %d", ris.ConfusionMatrix[1][0])
 	}
 	if ris.ConfusionMatrix[1][1] != 1 {
-		t.Fatalf("ConfusionMatrix[1][1] should be 3 instead is %d", ris.ConfusionMatrix[1][1])
+		t.Fatalf("ConfusionMatrix[1][1] should be 1 instead is %d", ris.ConfusionMatrix[1][1])
 	}
-	if len(ris.PredictionResult) != 4 {
-		t.Fatalf("Error: prediction result should have len 4 but having %d", len(ris.PredictionResult))
-	}
-	for i := 0; i < len(ris.PredictionResult); i++ {
-		for j := 0; j < len(ris.PredictionResult[i]); j++ {
-			if ris.PredictionResult[i][j] != correctResults[i][j] {
-				t.Fatalf("Error element %d-%d should be %f but is %f", i, j, ris.PredictionResult[i][j], correctResults[i][j])
-			}
-		}
+	if len(ris.PredictionResult) != 5 {
+		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
 	}
 }
 
@@ -988,16 +1033,16 @@ func TestValidateTwoOutput(t *testing.T) {
 	nn.LinearOutput = true
 	nn.Weights = [][][]float64{
 		{
-			{0.3707766042, 0.3130231630},
-			{-0.8593964782, -1.6980561950},
-			{1.6986240116, -0.2471338187},
-			{0.6781978162, -1.1633329710},
-			{-0.9446642086, -0.2910403321},
+			{0.4478596725, 0.4272406514},
+			{-1.4968296883, -0.4723731907},
+			{1.5803919589, -0.2119447123},
+			{-1.7571365361, 0.1672229849},
+			{-0.1102761778, -0.2082827319},
 		},
 		{
-			{0.2158120155, -0.7702536416},
-			{0.4455022877, -0.9965881874},
-			{-0.3543477143, 1.2040803786},
+			{-0.3504975524, 2.4987831196},
+			{-1.3492038619, 0.6358405903},
+			{-1.6063061042, 0.4339709907},
 		},
 	}
 
@@ -1008,14 +1053,12 @@ func TestValidateTwoOutput(t *testing.T) {
 			{0, 0, 0, 1},
 			{1, 0, 0, 0},
 			{1, 0, 0, 0},
-			{0, 0, 0, 1},
 		},
 		[][]float64{
 			{0, 1},
 			{1, 0},
 			{1, 0},
 			{1, 0},
-			{0, 1},
 			{0, 1},
 		},
 	)
@@ -1025,15 +1068,68 @@ func TestValidateTwoOutput(t *testing.T) {
 		{1, 0, 0, 0},
 		{0, 0, 0, 1},
 		{1, 0, 0, 0},
-		{1, 0, 0, 0}}
+		{1, 0, 0, 0},
+	}
 
-	correctResults := [][]float64{{0.007648935154, 1.0006310706}, {0.668372765631, 0.3349155121}, {0.497756950918, 0.5005216145}, {0.668372765631, 0.3349155121}, {0.668372765631, 0.3349155121}}
+	correctResults := [][]float64{{-0.00303106824, 1.002621445827}, {0.66858268969, 0.334850483498},
+		{0.99559322480, 0.001559925299}, {0.66858268969, 0.334850483498},
+		{0.66858268969, 0.334850483498}}
 	ris, err := nn.Validate(testSetData, correctResults)
+	if err != nil {
+		t.Fatalf("Error during validate phase: %s", err.Error())
+	}
+	fmt.Println(ris)
 
-	t.Log(ris)
+	if ris.CorrectPrediction != 5 {
+		t.Fatalf("Error: correct prediction should be 5 but is %d", ris.CorrectPrediction)
+	}
+	if len(ris.ConfusionMatrix) != 2 {
+		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
+	}
+	if len(ris.ConfusionMatrix[0]) != 2 {
+		t.Fatalf("Exspected matrix row zero of len 2 but having %d.", len(ris.ConfusionMatrix[0]))
+	}
+	if len(ris.ConfusionMatrix[1]) != 2 {
+		t.Fatalf("Exspected matrix row one of len 2 but having %d.", len(ris.ConfusionMatrix[1]))
+	}
+	if ris.ConfusionMatrix[0][0] != 4 {
+		t.Fatalf("ConfusionMatrix[0][0] should be 4 instead is %d", ris.ConfusionMatrix[0][0])
+	}
+	if ris.ConfusionMatrix[0][1] != 0 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 3 instead is %d", ris.ConfusionMatrix[0][1])
+	}
+	if ris.ConfusionMatrix[1][0] != 0 {
+		t.Fatalf("ConfusionMatrix[1][0] should be 3 instead is %d", ris.ConfusionMatrix[1][0])
+	}
+	if ris.ConfusionMatrix[1][1] != 1 {
+		t.Fatalf("ConfusionMatrix[1][1] should be 3 instead is %d", ris.ConfusionMatrix[1][1])
+	}
+	if len(ris.PredictionResult) != 5 {
+		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
+	}
+	/*for i := 0; i < len(ris.PredictionResult); i++ {
+		for j := 0; j < len(ris.PredictionResult[i]); j++ {
+			if ris.PredictionResult[i][j] != correctResults[i][j] {
+				t.Fatalf("Error element %d-%d should be %f but is %f", i, j, ris.PredictionResult[i][j], correctResults[i][j])
+			}
+		}
+	}*/
 
-	if ris.CorrectPrediction != 4 {
-		t.Fatalf("Error: correct prediction should be 4 but is %d", ris.CorrectPrediction)
+	outputExspected := [][]float64{
+		{0, 1},
+		{1, 0},
+		{1, 0},
+		{1, 0},
+		{0, 1},
+	}
+	ris, err = nn.Validate(testSetData, outputExspected)
+	if err != nil {
+		t.Fatalf("Error during validate phase: %s", err.Error())
+	}
+	fmt.Println(ris)
+
+	if ris.CorrectPrediction != 2 {
+		t.Fatalf("Error: correct prediction should be 2 but is %d", ris.CorrectPrediction)
 	}
 	if len(ris.ConfusionMatrix) != 2 {
 		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
@@ -1047,24 +1143,17 @@ func TestValidateTwoOutput(t *testing.T) {
 	if ris.ConfusionMatrix[0][0] != 3 {
 		t.Fatalf("ConfusionMatrix[0][0] should be 3 instead is %d", ris.ConfusionMatrix[0][0])
 	}
-	if ris.ConfusionMatrix[0][1] != 0 {
-		t.Fatalf("ConfusionMatrix[0][1] should be 3 instead is %d", ris.ConfusionMatrix[0][1])
+	if ris.ConfusionMatrix[0][1] != 1 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 1 instead is %d", ris.ConfusionMatrix[0][1])
 	}
 	if ris.ConfusionMatrix[1][0] != 0 {
-		t.Fatalf("ConfusionMatrix[1][0] should be 3 instead is %d", ris.ConfusionMatrix[1][0])
+		t.Fatalf("ConfusionMatrix[1][0] should be 0 instead is %d", ris.ConfusionMatrix[1][0])
 	}
 	if ris.ConfusionMatrix[1][1] != 1 {
-		t.Fatalf("ConfusionMatrix[1][1] should be 3 instead is %d", ris.ConfusionMatrix[1][1])
+		t.Fatalf("ConfusionMatrix[1][1] should be 1 instead is %d", ris.ConfusionMatrix[1][1])
 	}
-	if len(ris.PredictionResult) != 4 {
-		t.Fatalf("Error: prediction result should have len 4 but having %d", len(ris.PredictionResult))
-	}
-	for i := 0; i < len(ris.PredictionResult); i++ {
-		for j := 0; j < len(ris.PredictionResult[i]); j++ {
-			if ris.PredictionResult[i][j] != correctResults[i][j] {
-				t.Fatalf("Error element %d-%d should be %f but is %f", i, j, ris.PredictionResult[i][j], correctResults[i][j])
-			}
-		}
+	if len(ris.PredictionResult) != 5 {
+		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
 	}
 }
 

@@ -6,7 +6,6 @@
 package gorpropplus
 
 import (
-	"fmt"
 	"math"
 )
 
