@@ -407,9 +407,9 @@ func (n *NeuralNetwork) Validate(input [][]float64, output [][]float64) (*Valida
 			return nil, err
 		}
 
-		var max float64
+		max := -1.0
 		var maxpos int
-		var maxcorrect float64
+		maxcorrect := -1.0
 		var maxcorrectpos int
 		var correct int
 		for j := 0; j < len(prediction); j++ {
@@ -426,9 +426,9 @@ func (n *NeuralNetwork) Validate(input [][]float64, output [][]float64) (*Valida
 				}
 			}
 			if output[i][j] > maxcorrect {
-				maxcorrect = prediction[j]
+				maxcorrect = output[i][j]
 				// Manage the special case of having only 1 output
-				if len(output[0]) == 1 && prediction[j] < 0.5 {
+				if len(output[0]) == 1 && output[i][j] < 0.5 {
 					maxcorrectpos = 1
 				} else {
 					maxcorrectpos = j

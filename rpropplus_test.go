@@ -1,7 +1,6 @@
 package gorpropplus
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -939,15 +938,15 @@ func TestValidateSingleOutput(t *testing.T) {
 		{1, 0, 0, 0}}
 
 	correctResults := [][]float64{
-		{0.005245251675},
-		{0.667866367969},
-		{0.998111722794},
-		{0.667866367969},
-		{0.667866367969}}
+		{0.005245251659620323},
+		{0.6678663680184379},
+		{0.9981117228963627},
+		{0.6678663680184379},
+		{0.6678663680184379}}
 
 	ris, err := nn.Validate(testSetData, correctResults)
 	t.Log(ris)
-	fmt.Println(ris)
+
 	if ris.CorrectPrediction != 5 {
 		t.Fatalf("Error: correct prediction should be 5 but is %d", ris.CorrectPrediction)
 	}
@@ -975,13 +974,14 @@ func TestValidateSingleOutput(t *testing.T) {
 	if len(ris.PredictionResult) != 5 {
 		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
 	}
-	/*for i := 0; i < len(ris.PredictionResult); i++ {
+
+	for i := 0; i < len(ris.PredictionResult); i++ {
 		for j := 0; j < len(ris.PredictionResult[i]); j++ {
 			if ris.PredictionResult[i][j] != correctResults[i][j] {
-				t.Fatalf("Error element %d-%d should be %f but is %f", i, j, ris.PredictionResult[i][j], correctResults[i][j])
+				t.Fatalf("Error element %d-%d should be %v but is %v", i, j, ris.PredictionResult[i][j], correctResults[i][j])
 			}
 		}
-	}*/
+	}
 
 	outputExspected := [][]float64{
 		{0},
@@ -991,10 +991,10 @@ func TestValidateSingleOutput(t *testing.T) {
 		{0},
 	}
 	ris, err = nn.Validate(testSetData, outputExspected)
+	t.Log(ris)
 	if err != nil {
 		t.Fatalf("Error during validate phase: %s", err.Error())
 	}
-	fmt.Println(ris)
 	if ris.CorrectPrediction != 2 {
 		t.Fatalf("Error: correct prediction should be 5 but is %d", ris.CorrectPrediction)
 	}
@@ -1071,14 +1071,13 @@ func TestValidateTwoOutput(t *testing.T) {
 		{1, 0, 0, 0},
 	}
 
-	correctResults := [][]float64{{-0.00303106824, 1.002621445827}, {0.66858268969, 0.334850483498},
-		{0.99559322480, 0.001559925299}, {0.66858268969, 0.334850483498},
-		{0.66858268969, 0.334850483498}}
+	correctResults := [][]float64{{-0.0030310681652233606, 1.0026214457934146}, {0.6685826897365507, 0.33485048349219504},
+		{0.9955932248333315, 0.0015599252841957956}, {0.6685826897365507, 0.33485048349219504},
+		{0.6685826897365507, 0.33485048349219504}}
 	ris, err := nn.Validate(testSetData, correctResults)
 	if err != nil {
 		t.Fatalf("Error during validate phase: %s", err.Error())
 	}
-	fmt.Println(ris)
 
 	if ris.CorrectPrediction != 5 {
 		t.Fatalf("Error: correct prediction should be 5 but is %d", ris.CorrectPrediction)
@@ -1107,13 +1106,13 @@ func TestValidateTwoOutput(t *testing.T) {
 	if len(ris.PredictionResult) != 5 {
 		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
 	}
-	/*for i := 0; i < len(ris.PredictionResult); i++ {
+	for i := 0; i < len(ris.PredictionResult); i++ {
 		for j := 0; j < len(ris.PredictionResult[i]); j++ {
 			if ris.PredictionResult[i][j] != correctResults[i][j] {
-				t.Fatalf("Error element %d-%d should be %f but is %f", i, j, ris.PredictionResult[i][j], correctResults[i][j])
+				t.Fatalf("Error element %d-%d should be %v but is %v", i, j, ris.PredictionResult[i][j], correctResults[i][j])
 			}
 		}
-	}*/
+	}
 
 	outputExspected := [][]float64{
 		{0, 1},
@@ -1126,7 +1125,6 @@ func TestValidateTwoOutput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error during validate phase: %s", err.Error())
 	}
-	fmt.Println(ris)
 
 	if ris.CorrectPrediction != 2 {
 		t.Fatalf("Error: correct prediction should be 2 but is %d", ris.CorrectPrediction)
