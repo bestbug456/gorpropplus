@@ -6,7 +6,7 @@
 package gorpropplus
 
 import (
-	"fmt"
+	"math"
 )
 
 // NeuralNetwork is the actual neural network object
@@ -16,12 +16,12 @@ type NeuralNetwork struct {
 	TotalWeights           int
 	NrCol                  []int
 	NrRow                  []int
-	ActivationFunction     func(float64) float64
-	DerivateActivation     func(float64) float64
-	ErrorFunction          func(float64, float64) float64
-	DerivateError          func(float64, float64) float64
-	ActivationFunctionName string
-	ErrorFunctionName      string
+	ActivationFunction     func(float64) float64          `bson:"-"`
+	DerivateActivation     func(float64) float64          `bson:"-"`
+	ErrorFunction          func(float64, float64) float64 `bson:"-"`
+	DerivateError          func(float64, float64) float64 `bson:"-"`
+	ActivationFunctionName string                         `bson:"-"`
+	ErrorFunctionName      string                         `bson:"-"`
 	LearningRate           []float64
 	// Neural Network configuration
 	Threshold    float64
@@ -32,7 +32,7 @@ type NeuralNetwork struct {
 	Plus         float64
 }
 
-// NeuralNetworkArguments permit to compact all 
+// NeuralNetworkArguments permit to compact all
 // the various arguments need by this library.
 type NeuralNetworkArguments struct {
 	LearningRate       []float64
@@ -51,6 +51,38 @@ type NeuralNetworkArguments struct {
 	DerivateError      func(float64, float64) float64
 }
 
+// ValidationResult contain the following infos
+// * ConfusionMatrix: A confusion matrix struct as follow:
+//
+//                   Exspected value
+//
+//            +---------+----+----+----+
+//            |XXXX|    |    |    |    |
+//            |XXXX| V1 | V2 | V3 | V4 |
+//            +------------------------+
+//            |    |    |    |    |    |
+//            | V1 |  2 |  0 |  1 |  3 |
+//            +------------------------+
+//Predicted   |    |    |    |    |    |
+//  value     | V2 |  7 |  3 |  9 |  0 |
+//            +------------------------+
+//            |    |    |    |    |    |
+//            | V3 |  1 |  1 |  4 |  1 |
+//            +------------------------+
+//            |    |    |    |    |    |
+//            | V4 |  3 |  2 |  1 |  5 |
+//            +----+----+----+----+----+
+//
+// * CorrectPrediction: contain the number of prediction
+//						having distance from the exspected
+//						value < threshold.
+// * PredictionResult: Contain all the prediction done.
+type ValidationResult struct {
+	ConfusionMatrix   [][]int
+	CorrectPrediction int
+	PredictionResult  [][]float64
+}
+
 // NewNeuralNetworkAndSetup create a fresh  new
 // neural network struct and it  inizialise  it
 // internal weights.
@@ -59,8 +91,9 @@ func NewNeuralNetworkAndSetup(args NeuralNetworkArguments) (*NeuralNetwork, erro
 	var totalWeights int
 	var nrRow []int
 	var nrCol []int
+	previusLayer := args.InputSize
 	if len(args.HiddenLayer) == 1 && args.HiddenLayer[0] == 0 {
-		sliceWeights := randomNormalSlice((args.InputSize + 1) * args.OutputSize)
+		sliceWeights := randomNormalSlice((args.InputSize+1)*args.OutputSize, previusLayer)
 		totalWeights = (args.InputSize + 1) * args.OutputSize
 		weights = make([][][]float64, 1)
 		var err error
@@ -82,11 +115,12 @@ func NewNeuralNetworkAndSetup(args NeuralNetworkArguments) (*NeuralNetwork, erro
 		weights = make([][][]float64, len(nrCol))
 		var err error
 		for i := 0; i < len(weights); i++ {
-			weights[i], err = createMatrix(nrRow[i], nrCol[i], randomNormalSlice(nrCol[i]*nrRow[i]))
+			weights[i], err = createMatrix(nrRow[i], nrCol[i], randomNormalSlice(nrCol[i]*nrRow[i], previusLayer))
 			totalWeights = nrCol[i] * nrRow[i]
 			if err != nil {
 				return nil, err
 			}
+			previusLayer = len(weights[i]) - 1
 		}
 	}
 
@@ -143,7 +177,6 @@ func (n *NeuralNetwork) Train(input [][]float64, output [][]float64) error {
 			break
 		}
 		gradientsOld = n.plus(gradients, gradientsOld)
-		//fmt.Println("weights", n.Weights)
 
 		deriv, allInputCoviariate, outputNet, err = n.computeNet(input, output)
 		if err != nil {
@@ -357,21 +390,64 @@ func (n *NeuralNetwork) activationNeuronAndDerivate(x, y [][]float64) ([][]float
 	return activate, derivate, nil
 }
 
-// Validate use a validation dataset is  a  set
-// of examples used to tune the hyperparameters.
-func (n *NeuralNetwork) Validate(input [][]float64, output [][]float64) ([][]float64, error) {
-	return nil, fmt.Errorf("Method not yet implemented!")
-}
+// Validate use a validation dataset and create and return a ValidationResult
+func (n *NeuralNetwork) Validate(input [][]float64, output [][]float64) (*ValidationResult, error) {
 
-// TrainAndValidate is a utility function which
-// under  the hood make a train  and a validate
-// using the  first  half of the data for train
-// and  the  second half for the validation. It
-// return an  error  if something went wrong or
-// the  confusion   matrix  of  the  validation
-// result.
-func (n *NeuralNetwork) TrainAndValidate(input []float64, output []float64) ([][]float64, error) {
-	return nil, fmt.Errorf("Method not yet implemented!")
+	totalclass := len(output[0])
+	if totalclass == 1 {
+		totalclass++
+	}
+	var result ValidationResult
+	result.ConfusionMatrix = make([][]int, totalclass)
+	result.PredictionResult = make([][]float64, len(input))
+	for i := 0; i < len(input); i++ {
+
+		prediction, err := n.Predict(input[i])
+		if err != nil {
+			return nil, err
+		}
+
+		max := -1.0
+		var maxpos int
+		maxcorrect := -1.0
+		var maxcorrectpos int
+		var correct int
+		for j := 0; j < len(prediction); j++ {
+			if math.Abs(prediction[j]-output[i][j]) < n.Threshold {
+				correct++
+			}
+			if prediction[j] > max {
+				max = prediction[j]
+				// Manage the special case of having only 1 output
+				if len(output[0]) == 1 && prediction[j] < 0.5 {
+					maxpos = 1
+				} else {
+					maxpos = j
+				}
+			}
+			if output[i][j] > maxcorrect {
+				maxcorrect = output[i][j]
+				// Manage the special case of having only 1 output
+				if len(output[0]) == 1 && output[i][j] < 0.5 {
+					maxcorrectpos = 1
+				} else {
+					maxcorrectpos = j
+				}
+
+			}
+		}
+
+		if len(result.ConfusionMatrix[maxpos]) == 0 {
+			result.ConfusionMatrix[maxpos] = make([]int, totalclass)
+		}
+		result.ConfusionMatrix[maxpos][maxcorrectpos]++
+		result.PredictionResult[i] = prediction
+		if correct == len(output[i]) {
+			result.CorrectPrediction++
+		}
+	}
+
+	return &result, nil
 }
 
 // Predict permit to have a prediction  of  the
@@ -390,8 +466,8 @@ func (n *NeuralNetwork) Predict(input []float64) ([]float64, error) {
 	}
 	inputCovariate[0] = covariate
 
-	allinputCovariate[0] = inputCovariate
 	var err error
+
 	for i := 0; i < len(n.Weights); i++ {
 		allinputCovariate[i] = inputCovariate
 		inputCovariate, _, err = n.activationNeuronAndDerivate(allinputCovariate[i], n.Weights[i])

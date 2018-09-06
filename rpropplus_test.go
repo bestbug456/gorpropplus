@@ -891,6 +891,255 @@ func TestPredict(t *testing.T) {
 	}
 }
 
+func TestValidateSingleOutput(t *testing.T) {
+	nn, err := createNewStandardNNOneHiddenlayer()
+	if err != nil {
+		t.Fatalf("Error while creating a new neural network: %s", err.Error())
+	}
+	// predict with linear output TRUE
+	nn.LinearOutput = true
+	nn.Weights = [][][]float64{
+		{
+			{0.7788210021, 0.5535181098},
+			{-2.0926177299, -1.1348713531},
+			{0.7267475472, -0.4336522465},
+			{-1.0139834634, -1.3007889565},
+			{-0.4234252965, 0.7774171900},
+		},
+		{
+			{-0.749979932},
+			{-2.947707723},
+			{-1.095752317},
+		},
+	}
+
+	nn.Train(
+		[][]float64{
+			{0, 1, 0, 0},
+			{1, 0, 0, 0},
+			{0, 0, 0, 1},
+			{1, 0, 0, 0},
+			{1, 0, 0, 0},
+		},
+		[][]float64{
+			{0},
+			{1},
+			{1},
+			{1},
+			{0},
+		},
+	)
+
+	testSetData := [][]float64{
+		{0, 1, 0, 0},
+		{1, 0, 0, 0},
+		{0, 0, 0, 1},
+		{1, 0, 0, 0},
+		{1, 0, 0, 0}}
+
+	correctResults := [][]float64{
+		{0.005245251659620323},
+		{0.6678663680184379},
+		{0.9981117228963627},
+		{0.6678663680184379},
+		{0.6678663680184379}}
+
+	ris, err := nn.Validate(testSetData, correctResults)
+	t.Log(ris)
+
+	if ris.CorrectPrediction != 5 {
+		t.Fatalf("Error: correct prediction should be 5 but is %d", ris.CorrectPrediction)
+	}
+	if len(ris.ConfusionMatrix) != 2 {
+		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
+	}
+	if len(ris.ConfusionMatrix[0]) != 2 {
+		t.Fatalf("Exspected matrix row zero of len 2 but having %d.", len(ris.ConfusionMatrix[0]))
+	}
+	if len(ris.ConfusionMatrix[1]) != 2 {
+		t.Fatalf("Exspected matrix row one of len 2 but having %d.", len(ris.ConfusionMatrix[1]))
+	}
+	if ris.ConfusionMatrix[0][0] != 4 {
+		t.Fatalf("ConfusionMatrix[0][0] should be 4 instead is %d", ris.ConfusionMatrix[0][0])
+	}
+	if ris.ConfusionMatrix[0][1] != 0 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 0 instead is %d", ris.ConfusionMatrix[0][1])
+	}
+	if ris.ConfusionMatrix[1][0] != 0 {
+		t.Fatalf("ConfusionMatrix[1][0] should be 0 instead is %d", ris.ConfusionMatrix[1][0])
+	}
+	if ris.ConfusionMatrix[1][1] != 1 {
+		t.Fatalf("ConfusionMatrix[1][1] should be 1 instead is %d", ris.ConfusionMatrix[1][1])
+	}
+	if len(ris.PredictionResult) != 5 {
+		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
+	}
+
+	outputExspected := [][]float64{
+		{0},
+		{1},
+		{1},
+		{1},
+		{0},
+	}
+	ris, err = nn.Validate(testSetData, outputExspected)
+	t.Log(ris)
+	if err != nil {
+		t.Fatalf("Error during validate phase: %s", err.Error())
+	}
+	if ris.CorrectPrediction != 2 {
+		t.Fatalf("Error: correct prediction should be 5 but is %d", ris.CorrectPrediction)
+	}
+	if len(ris.ConfusionMatrix) != 2 {
+		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
+	}
+	if len(ris.ConfusionMatrix[0]) != 2 {
+		t.Fatalf("Exspected matrix row zero of len 2 but having %d.", len(ris.ConfusionMatrix[0]))
+	}
+	if len(ris.ConfusionMatrix[1]) != 2 {
+		t.Fatalf("Exspected matrix row one of len 2 but having %d.", len(ris.ConfusionMatrix[1]))
+	}
+	if ris.ConfusionMatrix[0][0] != 3 {
+		t.Fatalf("ConfusionMatrix[0][0] should be 3 instead is %d", ris.ConfusionMatrix[0][0])
+	}
+	if ris.ConfusionMatrix[0][1] != 1 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 1 instead is %d", ris.ConfusionMatrix[0][1])
+	}
+	if ris.ConfusionMatrix[1][0] != 0 {
+		t.Fatalf("ConfusionMatrix[1][0] should be 0 instead is %d", ris.ConfusionMatrix[1][0])
+	}
+	if ris.ConfusionMatrix[1][1] != 1 {
+		t.Fatalf("ConfusionMatrix[1][1] should be 1 instead is %d", ris.ConfusionMatrix[1][1])
+	}
+	if len(ris.PredictionResult) != 5 {
+		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
+	}
+}
+
+func TestValidateTwoOutput(t *testing.T) {
+	nn, err := createNewStandardNNOneHiddenlayer()
+	if err != nil {
+		t.Fatalf("Error while creating a new neural network: %s", err.Error())
+	}
+	// predict with linear output TRUE
+	nn.LinearOutput = true
+	nn.Weights = [][][]float64{
+		{
+			{0.4478596725, 0.4272406514},
+			{-1.4968296883, -0.4723731907},
+			{1.5803919589, -0.2119447123},
+			{-1.7571365361, 0.1672229849},
+			{-0.1102761778, -0.2082827319},
+		},
+		{
+			{-0.3504975524, 2.4987831196},
+			{-1.3492038619, 0.6358405903},
+			{-1.6063061042, 0.4339709907},
+		},
+	}
+
+	nn.Train(
+		[][]float64{
+			{0, 1, 0, 0},
+			{1, 0, 0, 0},
+			{0, 0, 0, 1},
+			{1, 0, 0, 0},
+			{1, 0, 0, 0},
+		},
+		[][]float64{
+			{0, 1},
+			{1, 0},
+			{1, 0},
+			{1, 0},
+			{0, 1},
+		},
+	)
+
+	testSetData := [][]float64{
+		{0, 1, 0, 0},
+		{1, 0, 0, 0},
+		{0, 0, 0, 1},
+		{1, 0, 0, 0},
+		{1, 0, 0, 0},
+	}
+
+	correctResults := [][]float64{{-0.0030310681652233606, 1.0026214457934146}, {0.6685826897365507, 0.33485048349219504},
+		{0.9955932248333315, 0.0015599252841957956}, {0.6685826897365507, 0.33485048349219504},
+		{0.6685826897365507, 0.33485048349219504}}
+	ris, err := nn.Validate(testSetData, correctResults)
+	if err != nil {
+		t.Fatalf("Error during validate phase: %s", err.Error())
+	}
+
+	if ris.CorrectPrediction != 5 {
+		t.Fatalf("Error: correct prediction should be 5 but is %d", ris.CorrectPrediction)
+	}
+	if len(ris.ConfusionMatrix) != 2 {
+		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
+	}
+	if len(ris.ConfusionMatrix[0]) != 2 {
+		t.Fatalf("Exspected matrix row zero of len 2 but having %d.", len(ris.ConfusionMatrix[0]))
+	}
+	if len(ris.ConfusionMatrix[1]) != 2 {
+		t.Fatalf("Exspected matrix row one of len 2 but having %d.", len(ris.ConfusionMatrix[1]))
+	}
+	if ris.ConfusionMatrix[0][0] != 4 {
+		t.Fatalf("ConfusionMatrix[0][0] should be 4 instead is %d", ris.ConfusionMatrix[0][0])
+	}
+	if ris.ConfusionMatrix[0][1] != 0 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 3 instead is %d", ris.ConfusionMatrix[0][1])
+	}
+	if ris.ConfusionMatrix[1][0] != 0 {
+		t.Fatalf("ConfusionMatrix[1][0] should be 3 instead is %d", ris.ConfusionMatrix[1][0])
+	}
+	if ris.ConfusionMatrix[1][1] != 1 {
+		t.Fatalf("ConfusionMatrix[1][1] should be 3 instead is %d", ris.ConfusionMatrix[1][1])
+	}
+	if len(ris.PredictionResult) != 5 {
+		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
+	}
+
+	outputExspected := [][]float64{
+		{0, 1},
+		{1, 0},
+		{1, 0},
+		{1, 0},
+		{0, 1},
+	}
+	ris, err = nn.Validate(testSetData, outputExspected)
+	if err != nil {
+		t.Fatalf("Error during validate phase: %s", err.Error())
+	}
+
+	if ris.CorrectPrediction != 2 {
+		t.Fatalf("Error: correct prediction should be 2 but is %d", ris.CorrectPrediction)
+	}
+	if len(ris.ConfusionMatrix) != 2 {
+		t.Fatalf("Exspected matrix of len 2 but having %d.", len(ris.ConfusionMatrix))
+	}
+	if len(ris.ConfusionMatrix[0]) != 2 {
+		t.Fatalf("Exspected matrix row zero of len 2 but having %d.", len(ris.ConfusionMatrix[0]))
+	}
+	if len(ris.ConfusionMatrix[1]) != 2 {
+		t.Fatalf("Exspected matrix row one of len 2 but having %d.", len(ris.ConfusionMatrix[1]))
+	}
+	if ris.ConfusionMatrix[0][0] != 3 {
+		t.Fatalf("ConfusionMatrix[0][0] should be 3 instead is %d", ris.ConfusionMatrix[0][0])
+	}
+	if ris.ConfusionMatrix[0][1] != 1 {
+		t.Fatalf("ConfusionMatrix[0][1] should be 1 instead is %d", ris.ConfusionMatrix[0][1])
+	}
+	if ris.ConfusionMatrix[1][0] != 0 {
+		t.Fatalf("ConfusionMatrix[1][0] should be 0 instead is %d", ris.ConfusionMatrix[1][0])
+	}
+	if ris.ConfusionMatrix[1][1] != 1 {
+		t.Fatalf("ConfusionMatrix[1][1] should be 1 instead is %d", ris.ConfusionMatrix[1][1])
+	}
+	if len(ris.PredictionResult) != 5 {
+		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
+	}
+}
+
 // UTILITY FUNCTION FOR TESTING
 
 func createNewStandardNNOneHiddenlayer() (*NeuralNetwork, error) {
