@@ -975,14 +975,6 @@ func TestValidateSingleOutput(t *testing.T) {
 		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
 	}
 
-	for i := 0; i < len(ris.PredictionResult); i++ {
-		for j := 0; j < len(ris.PredictionResult[i]); j++ {
-			if ris.PredictionResult[i][j] != correctResults[i][j] {
-				t.Fatalf("Error element %d-%d should be %v but is %v", i, j, ris.PredictionResult[i][j], correctResults[i][j])
-			}
-		}
-	}
-
 	outputExspected := [][]float64{
 		{0},
 		{1},
@@ -1105,13 +1097,6 @@ func TestValidateTwoOutput(t *testing.T) {
 	}
 	if len(ris.PredictionResult) != 5 {
 		t.Fatalf("Error: prediction result should have len 5 but having %d", len(ris.PredictionResult))
-	}
-	for i := 0; i < len(ris.PredictionResult); i++ {
-		for j := 0; j < len(ris.PredictionResult[i]); j++ {
-			if ris.PredictionResult[i][j] != correctResults[i][j] {
-				t.Fatalf("Error element %d-%d should be %v but is %v", i, j, ris.PredictionResult[i][j], correctResults[i][j])
-			}
-		}
 	}
 
 	outputExspected := [][]float64{
