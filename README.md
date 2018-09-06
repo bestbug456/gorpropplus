@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/bestbug456/gorpropplus/branch/master/graph/badge.svg)](https://codecov.io/gh/bestbug456/gorpropplus)&nbsp;
 [![Go Report Card](https://goreportcard.com/badge/github.com/bestbug456/gorpropplus)](https://goreportcard.com/report/github.com/bestbug456/gorpropplus)&nbsp;
 
-This project contains the Neural Network called "rprop+" (resilient backpropagation with weight backtracking) with He-et-al Initialization. The project is pure go: no external dependences!
+This project contains the Neural Network called "rprop+" (resilient backpropagation with weight backtracking) with He-et-al Initialization. The project is pure go: no external dependencies!
 
 ##### From [Wikipedia](https://en.wikipedia.org/wiki/Rprop "Wikipedia")
 Rprop+, short for resilient backpropagation, is a learning heuristic for supervised learning in feedforward artificial neural networks. This is a first-order optimization algorithm. This algorithm was created by Martin Riedmiller and Heinrich Braun in 1992.
