@@ -16,12 +16,12 @@ type NeuralNetwork struct {
 	TotalWeights           int
 	NrCol                  []int
 	NrRow                  []int
-	ActivationFunction     func(float64) float64          `bson:"-"`
-	DerivateActivation     func(float64) float64          `bson:"-"`
-	ErrorFunction          func(float64, float64) float64 `bson:"-"`
-	DerivateError          func(float64, float64) float64 `bson:"-"`
-	ActivationFunctionName string                         `bson:"-"`
-	ErrorFunctionName      string                         `bson:"-"`
+	ActivationFunction     func(float64) float64          `bson:"-" json:"-"`
+	DerivateActivation     func(float64) float64          `bson:"-" json:"-"`
+	ErrorFunction          func(float64, float64) float64 `bson:"-" json:"-"`
+	DerivateError          func(float64, float64) float64 `bson:"-" json:"-"`
+	ActivationFunctionName string                         `bson:"-" json:"-"`
+	ErrorFunctionName      string                         `bson:"-" json:"-"`
 	LearningRate           []float64
 	// Neural Network configuration
 	Threshold    float64
